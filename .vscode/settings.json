@@ -1,6 +1,8 @@
 {
     "files.associations": {
-        "iostream": "cpp",
+        "ostream": "cpp",
+        "filesystem": "cpp",
+        "stdexcept": "cpp",
         "any": "cpp",
         "array": "cpp",
         "atomic": "cpp",
@@ -10,9 +12,9 @@
         "chrono": "cpp",
         "clocale": "cpp",
         "cmath": "cpp",
+        "codecvt": "cpp",
         "compare": "cpp",
         "concepts": "cpp",
-        "condition_variable": "cpp",
         "cstdarg": "cpp",
         "cstddef": "cpp",
         "cstdint": "cpp",
@@ -50,22 +52,25 @@
         "initializer_list": "cpp",
         "iomanip": "cpp",
         "iosfwd": "cpp",
+        "iostream": "cpp",
         "istream": "cpp",
         "limits": "cpp",
-        "mutex": "cpp",
         "new": "cpp",
         "numbers": "cpp",
-        "ostream": "cpp",
-        "semaphore": "cpp",
         "sstream": "cpp",
-        "stdexcept": "cpp",
-        "stop_token": "cpp",
         "streambuf": "cpp",
-        "thread": "cpp",
-        "cinttypes": "cpp",
         "typeinfo": "cpp",
         "variant": "cpp",
-        "future": "cpp"
+        "ranges": "cpp",
+        "condition_variable": "cpp",
+        "future": "cpp",
+        "mutex": "cpp",
+        "semaphore": "cpp",
+        "stop_token": "cpp",
+        "thread": "cpp",
+        "charconv": "cpp",
+        "csignal": "cpp",
+        "shared_mutex": "cpp"
     },
     "C_Cpp.default.cppStandard": "c++20",
     "testMate.cpp.test.advancedExecutables": [
@@ -73,5 +78,6 @@
           "pattern": "{build,Build,BUILD,out,Out,OUT}/**/*{test,Test,TEST,tst}*",
           "cwd": "${absDirpath}"
         }
-    ]
+    ],
+    "C_Cpp.errorSquiggles": "enabled"
 }
