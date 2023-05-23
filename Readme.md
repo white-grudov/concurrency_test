@@ -9,3 +9,4 @@ This project utilizes the FileReader, which reads the files from the given direc
 ### TODO:
 - [ ] Composable futures (ReCpp ?)
 - [ ] Expand on coroutines functionality
+- [ ] Write tests
