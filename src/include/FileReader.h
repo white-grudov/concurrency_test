@@ -16,7 +16,7 @@ class FileReader {
     FileList files;
 
 public:
-    FileReader(std::string directoryPath) : directoryPath(directoryPath) {}
+    FileReader(std::string directoryPath) noexcept : directoryPath { directoryPath } {}
 
     FileReader(const FileReader&) = delete;
     FileReader& operator=(const FileReader&) = delete;
@@ -25,7 +25,7 @@ public:
 
     FileList readFilesInDirectory() const
     {
-        fs::path path(directoryPath);
+        fs::path path { directoryPath };
 
         if (!fs::exists(path) || !fs::is_directory(path))
         {

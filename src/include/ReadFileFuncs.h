@@ -22,7 +22,7 @@ FileList readFilesTaskBased(const std::vector<std::string>& directories,
     {
         std::future<FileList> future = std::async(std::launch::async, [directory]() 
         {
-            FileReader reader(directory);
+            FileReader reader { directory };
             return reader.readFilesInDirectory();
         });
 
@@ -61,8 +61,8 @@ FileList readFilesTaskBased(const std::vector<std::string>& directories,
     return filteredFiles;
 }
 
-FileList readFilesComposableFutures(const std::vector<std::string>& directories,
-                                    const std::vector<std::string>& extensions)
+FileList readFilesComposableFutures(const std::vector<std::string>& directories)
+                                    // const std::vector<std::string>& extensions)
 {
     std::vector<std::future<FileList>> futures;
     FileList filteredFiles;
@@ -71,7 +71,7 @@ FileList readFilesComposableFutures(const std::vector<std::string>& directories,
     {
         std::future<FileList> future = std::async(std::launch::async, [directory]() 
         {
-            FileReader reader(directory);
+            FileReader reader { directory };
             return reader.readFilesInDirectory();
         });
 
@@ -117,7 +117,7 @@ Generator<FileList> readFilesCoroutine(const std::vector<std::string>& directori
 {
     for (const auto& directory : directories) 
     {
-        FileReader reader(directory);
+        FileReader reader { directory };
 
         for (const auto& extension : extensions) 
         {
