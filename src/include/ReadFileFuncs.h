@@ -1,63 +1,16 @@
 #pragma once
 
 // #include <rpp/future.h>
+#include "FileReader.h"
+#include "Generator.h"
 
 #include <filesystem>
 #include <string>
 #include <vector>
-#include <stdexcept>
-#include <ranges>
-#include <algorithm>
 #include <future>
 
 namespace fs = std::filesystem;
 using FileList = std::vector<fs::path>;
-
-class FileReader {
-
-    std::string directoryPath;
-    FileList files;
-
-public:
-    FileReader(std::string directoryPath) : directoryPath(directoryPath) {}
-
-    FileReader(const FileReader&) = delete;
-    FileReader& operator=(const FileReader&) = delete;
-    FileReader(FileReader&&) = delete;
-    FileReader& operator=(FileReader&&) = delete;
-
-    FileList readFilesInDirectory() const
-    {
-        fs::path path(directoryPath);
-
-        if (!fs::exists(path) || !fs::is_directory(path))
-        {
-            throw std::invalid_argument("Invalid directory path");
-        }
-
-        FileList files;
-        auto is_regular_filter = [](const auto& entry) {
-            return fs::is_regular_file(entry);
-        };
-
-        std::ranges::copy_if(fs::directory_iterator(path), 
-                             std::back_inserter(files),
-                             is_regular_filter);
-        
-        return files;
-    }
-
-    static FileList filterFiles(const FileList& files, 
-                                const std::string& extension)
-    {
-        auto filteredFiles = files | std::views::filter([&extension](const auto& file) 
-        {
-            return file.extension() == extension;
-        });
-
-        return FileList(filteredFiles.begin(), filteredFiles.end());
-    }
-};
 
 FileList readFilesTaskBased(const std::vector<std::string>& directories,
                             const std::vector<std::string>& extensions)
@@ -156,6 +109,33 @@ FileList readFilesComposableFutures(const std::vector<std::string>& directories,
         });
     }
     */
+
+    return filteredFiles;
+}
+
+Generator<FileList> readFilesCoroutine(const std::vector<std::string>& directories, const std::vector<std::string>& extensions)
+{
+    for (const auto& directory : directories) 
+    {
+        FileReader reader(directory);
+
+        for (const auto& extension : extensions) 
+        {
+            co_yield FileReader::filterFiles(reader.readFilesInDirectory(), extension);
+        }
+    }
+}
+
+FileList readFilesCoroutineBased(const std::vector<std::string>& directories, const std::vector<std::string>& extensions)
+{
+    FileList filteredFiles;
+    auto generator = readFilesCoroutine(directories, extensions);
+
+    for (int i = 0; generator; ++i) 
+    {
+        FileList files = generator();
+        filteredFiles.insert(filteredFiles.end(), files.begin(), files.end());
+    }
 
     return filteredFiles;
 }
