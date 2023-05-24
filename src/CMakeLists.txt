@@ -16,7 +16,7 @@ add_library(
     ${PROJECT_SOURCES}
 )
 
-target_include_directories(Concurrency_Src PUBLIC include) # PUBLIC include/rpp)
+target_include_directories(Concurrency_Src PUBLIC include PUBLIC include/old)
 target_link_libraries(Concurrency_Src PUBLIC ReCpp)
 
 add_executable(

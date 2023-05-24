@@ -1,9 +1,7 @@
 # Concurrency examples
 
-- Task-based (using std::async)
-- Composable futures
-- Coroutines
+- Fake FTP coroutines example
 
 ### TODO:
-- [ ] Expand on coroutines functionality
-- [ ] Write tests
+- [ ] !!! Process errors in coroutines without termination
+- [ ] Calling co_await directly on functions, without lambdas

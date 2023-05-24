@@ -68,7 +68,7 @@ struct Task
         auto return_value(T t) noexcept
         {
             value = std::move(t);
-            return std::suspend_always{};
+            // return std::suspend_always{};
         }
 
         Task<T> get_return_object() noexcept { return {handle_type::from_promise(*this)}; }
