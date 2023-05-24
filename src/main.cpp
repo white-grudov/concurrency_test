@@ -1,21 +1,32 @@
-#include <iostream>
+#include <string>
+#include <string_view>
 
-#include "ReadFileFuncs.h"
+#include "FTPRemoteAsync.h"
+#include "FTPRemoteComposable.h"
+#include "FTPRemoteCoroutines.h"
+#include "Task.h"
 
 int main()
 {
-    std::vector<std::string> directories = { "/home/whitegrudov/test/1",
-                                             "/home/whitegrudov/test/2",
-                                             "/home/whitegrudov/test/3" };
-    std::vector<std::string> extensions = { ".txt", ".png" };
-
-    // FileList files = readFilesTaskBased(directories, extensions);
-    FileList files = readFilesCoroutineBased(directories, extensions);
-
-    for (const auto& file : files)
+	// usage example, errors must be handled
+    // the actual work should be done in a background thread
+    // UI holds something equivalent to a future<string> to get the final result
+    try
     {
-        std::cout << file.string() << std::endl;
-    }
+	    kw::CoroutineFTPExample ftp;
+	    auto fileFuture = ftp.downloadFirstMatch("/home/whitegrudov/test",
+			[](std::string_view f) { return f.ends_with(".exe"); },
+	        [](int progress) { LogInfo("Download: %d%%", progress); });
 
+        // other tasks
+
+        std::string file = fileFuture.get();
+        
+        LogInfo("downloadFirstMatch success: %s", file.c_str());
+    }
+    catch (const std::exception& e)
+    {
+        LogError("downloadFirstMatch failed: %s", e.what());
+    }
     return 0;
 }
