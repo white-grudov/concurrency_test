@@ -7,5 +7,6 @@ This project utilizes the FileReader, which reads the files from the given direc
 - Coroutines
 
 ### TODO:
-[ ] Composable futures (ReCpp ?)
-[ ] Expand on coroutines functionality
+- [ ] Composable futures (ReCpp ?)
+- [ ] Expand on coroutines functionality
+- [ ] Write tests
