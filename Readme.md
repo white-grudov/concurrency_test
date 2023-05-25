@@ -3,5 +3,5 @@
 - Fake FTP coroutines example
 
 ### TODO:
-- [ ] !!! Process errors in coroutines without termination
-- [ ] Calling co_await directly on functions, without lambdas
+- [ ] !!! Starting coroutines in background thread
+- [ ] ? Calling co_await directly on functions, without lambdas
