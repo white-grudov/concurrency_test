@@ -72,7 +72,7 @@ TEST(CoroutineTest, WaitAndChangeValue)
 std::future<std::string> severalLambdas()
 {
     std::string result = co_await [&] { return std::string("first "); };
-    co_await [&] { result += "second "; return ""; };
+    result += co_await [&] { return "second "; };
     auto last = co_await [&] { result += "third "; return std::string("fourth"); };
 
     co_return result + last;
@@ -101,4 +101,20 @@ std::future<int> exceptionHandling()
 TEST(CoroutineTest, ExceptionHandling)
 {
     EXPECT_EQ(5, exceptionHandling().get());
+}
+
+std::future<void> voidLambdas(std::string& value, const std::string& newValue)
+{
+    co_await std::chrono::seconds(1);
+    co_await [&] { value = newValue; };
+}
+
+TEST(CoroutineTest, VoidLambdas)
+{
+    std::string value = "initial";
+    auto f = voidLambdas(value, "new");
+    EXPECT_EQ("initial", value);
+
+    f.get();
+    EXPECT_EQ("new", value);
 }

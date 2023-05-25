@@ -1,3 +1,5 @@
+#pragma once
+
 #include <chrono>
 #include <thread>
 #include <type_traits>
