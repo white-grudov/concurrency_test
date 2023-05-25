@@ -8,18 +8,11 @@ template <typename T, typename... Args>
     requires (!std::is_void_v<T> && !std::is_reference_v<T>)
 struct std::coroutine_traits<std::future<T>, Args...>
 {
-    struct promise_type
+    struct promise_type : std::promise<T>
     {
-        std::promise<T> promise;
-        std::exception_ptr exception;
-
         std::future<T> get_return_object() noexcept
         {
-            if (exception) 
-            {
-                std::rethrow_exception(exception);
-            }
-            return promise.get_future();
+            return this->get_future();
         }
 
         std::suspend_never initial_suspend() const noexcept { return {}; }
@@ -27,16 +20,15 @@ struct std::coroutine_traits<std::future<T>, Args...>
 
         void return_value(const T& value) noexcept(std::is_nothrow_copy_constructible_v<T>)
         {
-            promise.set_value(value);
+            this->set_value(value);
         }
         void return_value(T&& value) noexcept(std::is_nothrow_move_constructible_v<T>)
         {
-            promise.set_value(std::move(value));
+            this->set_value(std::move(value));
         }
         void unhandled_exception() noexcept
         {
-            exception = std::current_exception();
-            // promise.set_exception(std::current_exception());
+            this->set_exception(std::current_exception());
         }
     };
 };
@@ -44,18 +36,11 @@ struct std::coroutine_traits<std::future<T>, Args...>
 template <typename... Args>
 struct std::coroutine_traits<std::future<void>, Args...>
 {
-    struct promise_type
+    struct promise_type : std::promise<void>
     {
-        std::promise<void> promise;
-        std::exception_ptr exception;
-
         std::future<void> get_return_object() noexcept
         {
-            if (exception) 
-            {
-                std::rethrow_exception(exception);
-            }
-            return promise.get_future();
+            return this->get_future();
         }
 
         std::suspend_never initial_suspend() const noexcept { return {}; }
@@ -63,12 +48,11 @@ struct std::coroutine_traits<std::future<void>, Args...>
 
         void return_void() noexcept
         {
-            promise.set_value();
+            this->set_value();
         }
         void unhandled_exception() noexcept
         {
-            exception = std::current_exception();
-            // promise.set_exception(std::current_exception());
+            this->set_exception(std::current_exception());
         }
     };
 };

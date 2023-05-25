@@ -86,7 +86,7 @@ namespace kw
         {
             std::cout << "FakeFTP::downloadFile thread: " << std::this_thread::get_id() << '\n';
             LogInfo("DOWNLOAD %s (%zu KB)", remoteFile.path(), remoteFile.size / 1024);
-            // if (!remoteFile.isFile)
+            if (!remoteFile.isFile)
                 throw std::runtime_error{"FTP download failed, not a file: " + remoteFile.remotePath};
             
             std::ifstream inFile { remoteFile.remotePath, std::ios::binary };

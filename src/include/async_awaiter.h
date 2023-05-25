@@ -8,7 +8,6 @@ template <typename T>
 struct awaiter 
 {
     std::future<T>& future;
-    std::exception_ptr exception;
 
     bool await_ready() const 
     {
@@ -17,27 +16,15 @@ struct awaiter
 
     void await_suspend(std::coroutine_handle<> coroutine) 
     {
-        std::jthread([coroutine, &future = future, &exception = exception]() mutable 
+        std::jthread([coroutine, &future = future]() mutable 
         {
-            try 
-            {
-                future.wait();
-                coroutine();
-            } 
-            catch (...) 
-            {
-                exception = std::current_exception();
-                coroutine();
-            }
+            future.wait();
+            coroutine();
         }).detach();
     }
 
     T await_resume() 
     {
-        if (exception) 
-        {
-            std::rethrow_exception(exception);
-        }
         return future.get();
     }
 };
@@ -63,7 +50,7 @@ struct awaiter<void>
 
     void await_resume() 
     {
-        future.get();
+        return future.get();
     }
 };
 
