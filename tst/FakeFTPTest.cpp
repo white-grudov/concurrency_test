@@ -6,17 +6,25 @@
 
 #include "fakeftp_coroutines.h"
 
+std::future<std::string> getFileName(const std::string& path, const std::string& ext)
+{
+    kw::FakeFTP_Coroutines ftp;
+    std::string file = co_await ftp.downloadFirstMatch(path,
+        [&ext](std::string_view f) { return f.ends_with(ext); },
+        [](int progress) { return; });
+    co_return file;
+}
+
 TEST(FakeFTPTest, FileDownloadSuccessful)
 {
     kw::FakeFTP_Coroutines ftp;
     const std::string path = "/home/whitegrudov/test";
     const std::string ext = ".exe";
 
-    auto file = ftp.downloadFirstMatch(path,
-        [&ext](std::string_view f) { return f.ends_with(ext); },
-        [](int progress) { return; });
+    auto fileFuture = getFileName(path, ext);
+    auto filename = fileFuture.get();
 
-    EXPECT_EQ("/tmp/test.exe", file.get());
+    EXPECT_EQ("/tmp/test.exe", filename);
 }
 
 TEST(FakeFTPTest, FileDownloadFailed)
@@ -27,10 +35,8 @@ TEST(FakeFTPTest, FileDownloadFailed)
 
     try
     {
-        auto file = ftp.downloadFirstMatch(path,
-            [&ext](std::string_view f) { return f.ends_with(ext); },
-            [](int progress) { return; });
-        file.get();
+        auto fileFuture = getFileName(path, ext);
+        auto filename = fileFuture.get();
         FAIL();
     }
     catch (const std::exception& e)
