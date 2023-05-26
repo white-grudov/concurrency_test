@@ -17,7 +17,7 @@ std::future<void> test_Coroutines()
     try
     {
         std::string file = co_await ftp.downloadFirstMatch("/home/whitegrudov/test",
-			[](std::string_view f) { return f.ends_with(".exe"); },
+			[](std::string_view f) { return f.ends_with(".dll"); },
 	        [](int progress) { LogInfo("Download: %d%%", progress); });
         LogInfo("downloadFirstMatch success: %s", file);
         showResultInUI(true);

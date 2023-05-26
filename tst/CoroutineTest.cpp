@@ -1,6 +1,8 @@
 #include "gtest/gtest.h"
 
 #include <string>
+#include <vector>
+#include <thread>
 
 #include "coroutine_traits.h"
 #include "async_awaiter.h"
@@ -117,4 +119,20 @@ TEST(CoroutineTest, VoidLambdas)
 
     f.get();
     EXPECT_EQ("new", value);
+}
+
+std::future<std::vector<std::thread::id>> severalThreads()
+{
+    std::vector<std::thread::id> ids;
+
+    ids.push_back(co_await [] { return std::this_thread::get_id(); });
+    ids.push_back(co_await [] { return std::this_thread::get_id(); });
+
+    co_return ids;
+}
+
+TEST(CoroutineTest, SeveralThreads)
+{
+    auto ids = severalThreads().get();
+    EXPECT_NE(ids[0], ids[1]);
 }
