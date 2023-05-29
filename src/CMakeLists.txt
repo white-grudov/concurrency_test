@@ -7,7 +7,7 @@ include(FetchContent)
 FetchContent_Declare(
     ReCpp
     GIT_REPOSITORY https://github.com/RedFox20/ReCpp.git
-    GIT_TAG        3a2e2b0
+    GIT_TAG        master
 )
 FetchContent_MakeAvailable(ReCpp)
 

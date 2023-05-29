@@ -3,6 +3,8 @@
 #include <thread>
 #include <type_traits>
 
+#include "thread_pool.h"
+
 template <class Task>
 struct lambda_awaiter 
 {

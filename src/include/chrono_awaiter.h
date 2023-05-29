@@ -4,6 +4,8 @@
 #include <thread>
 #include <type_traits>
 
+#include "rpp/timer.h"
+
 template<class Clock = std::chrono::high_resolution_clock>
 struct chrono_awaiter
 {
@@ -26,7 +28,16 @@ struct chrono_awaiter
     {
         std::jthread ([cont, &end=end]() mutable 
         {
+#ifdef _MSC_VER
+            auto d = std::chrono::duration_cast<std::chrono::microseconds>(end - Clock::now());
+            int micros = static_cast<int>(d.count());
+            if (micros > 0)
+            {
+                rpp::sleep_us(micros);
+            }
+#else
             std::this_thread::sleep_until(end);
+#endif
             cont.resume();
         }).detach();
     }

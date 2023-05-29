@@ -33,6 +33,24 @@ TEST(CoroutineTest, SetValue)
     EXPECT_EQ(5, value);
 }
 
+TEST(CoroutineTest, StartsOnAwait)
+{
+    bool started = false;
+
+    auto f = [&]() -> std::future<void>
+    {
+        started = true;
+        co_return;
+    };
+
+    [&]() -> std::future<void>
+    {
+        EXPECT_FALSE(started);
+        co_await f();
+        EXPECT_TRUE(started);
+    }().get();
+}
+
 std::future<void> coroutineThrowException()
 {
     throw std::runtime_error("test");
@@ -125,8 +143,8 @@ std::future<std::vector<std::thread::id>> severalThreads()
 {
     std::vector<std::thread::id> ids;
 
-    ids.push_back(co_await [] { return std::this_thread::get_id(); });
-    ids.push_back(co_await [] { return std::this_thread::get_id(); });
+    ids.emplace_back(co_await []() -> std::thread::id { return std::this_thread::get_id(); });
+    ids.emplace_back(co_await []() -> std::thread::id { return std::this_thread::get_id(); });
 
     co_return ids;
 }
@@ -135,4 +153,55 @@ TEST(CoroutineTest, SeveralThreads)
 {
     auto ids = severalThreads().get();
     EXPECT_NE(ids[0], ids[1]);
+}
+
+std::future<std::vector<int>> destructorSequence()
+{
+    std::vector<int> dtorIds;
+    
+    struct DtorRecorder
+    {
+        std::vector<int>& results;
+        const int id;
+        ~DtorRecorder() noexcept { results.emplace_back(id); }
+    };
+
+    co_await ([&dtorIds]() -> std::future<void>
+    {
+        DtorRecorder dr {dtorIds, 1};
+        co_await std::chrono::milliseconds{10};
+    }());
+
+    EXPECT_EQ(dtorIds.size(), 1u);
+    EXPECT_EQ(dtorIds[0], 1);
+
+    co_await ([&dtorIds]() -> std::future<void>
+    {
+        DtorRecorder dr {dtorIds, 2};
+        co_await std::chrono::milliseconds{5};
+    }());
+
+    EXPECT_EQ(dtorIds.size(), 2u);
+    EXPECT_EQ(dtorIds[1], 2);
+
+    co_await ([&dtorIds]() -> std::future<void>
+    {
+        DtorRecorder dr {dtorIds, 3};
+        co_return;
+    }());
+    
+    EXPECT_EQ(dtorIds.size(), 3u);
+    EXPECT_EQ(dtorIds[2], 3);
+
+    co_return dtorIds;
+}
+
+TEST(CoroutineTest, DtorsCalledSequentially)
+{
+    std::vector<int> dtorIds = destructorSequence().get();
+
+    EXPECT_EQ(dtorIds.size(), 3u);
+    EXPECT_EQ(dtorIds[0], 1);
+    EXPECT_EQ(dtorIds[1], 2);
+    EXPECT_EQ(dtorIds[2], 3);
 }
