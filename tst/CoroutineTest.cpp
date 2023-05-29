@@ -205,3 +205,31 @@ TEST(CoroutineTest, DtorsCalledSequentially)
     EXPECT_EQ(dtorIds[1], 2);
     EXPECT_EQ(dtorIds[2], 3);
 }
+
+
+TEST(CoroutineTest, LambdaMemoryLeak)
+{
+    int ctorCount, dtorCount;
+    struct DtorRecorder
+    {
+        int& ctorCount, dtorCount;
+        DtorRecorder(int& c, int& d) : ctorCount(c), dtorCount(d) { ++ctorCount; }
+        ~DtorRecorder() noexcept { ++dtorCount; }
+    };
+    {
+        DtorRecorder recorder { ctorCount, dtorCount };
+        auto func = []() -> std::future<void> { co_return; };
+
+        auto lambda = [recorder, func]() -> std::future<DtorRecorder> {
+            co_await func();
+            co_await std::chrono::milliseconds{10};
+            co_return recorder;
+        };
+
+        {
+            lambda();
+        } 
+    }
+
+    EXPECT_NE(ctorCount, dtorCount);
+}
