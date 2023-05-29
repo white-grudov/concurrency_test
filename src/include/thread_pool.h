@@ -16,11 +16,15 @@ private:
     std::mutex queue_mutex;
     bool stop = false;
 public:
-    thread_pool(size_t threads) : stop(false) {
-        for (size_t i = 0; i < threads; ++i) {
+    thread_pool(size_t threads) : stop(false) 
+    {
+        for (size_t i = 0; i < threads; ++i) 
+        {
             workers.emplace_back(
-                [this] {
-                    while (true) {
+                [this] 
+                {
+                    while (true) 
+                    {
                         std::function<void()> task;
                         {
                             std::unique_lock<std::mutex> lock(this->queue_mutex);
@@ -37,7 +41,8 @@ public:
             );
         }
     }
-    ~thread_pool() {
+    ~thread_pool() 
+    {
         {
             std::unique_lock<std::mutex> lock(queue_mutex);
             stop = true;
@@ -61,9 +66,8 @@ public:
         {
             std::unique_lock<std::mutex> lock(queue_mutex);
 
-            // don't allow enqueueing after stopping the pool
             if (stop)
-                throw std::runtime_error("enqueue on stopped ThreadPool");
+                throw std::runtime_error("ThreadPool has stopped!");
 
             tasks.emplace([task](){ (*task)(); });
         }
